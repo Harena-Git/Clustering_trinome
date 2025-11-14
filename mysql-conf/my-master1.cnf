@@ -1,0 +1,9 @@
+[mysqld]
+server-id=1
+log-bin=mysql-bin
+binlog_do_db=replicadb
+auto_increment_increment=2
+auto_increment_offset=1
+enforce-gtid-consistency=true
+gtid-mode=ON
+log-slave-updates=ON

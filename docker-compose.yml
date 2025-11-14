@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  haproxy-http:
+    image: haproxy:latest
+    container_name: haproxy-http
+    ports:
+      - "8090:80"
+    volumes:
+      - ./haproxy-http/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    restart: always
+
+  haproxy-db:
+    image: haproxy:latest
+    container_name: haproxy-db
+    ports:
+      - "3307:3307"
+    volumes:
+      - ./haproxy-db/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    restart: always
+
+
+  webserver1:
+    build: ./web-server1
+    container_name: webserver1
+    restart: always
+    expose:
+      - "80"
+    ports:
+      - "8082:80"
+
+  webserver2:
+    build: ./web-server2
+    container_name: webserver2
+    restart: always
+    expose:
+      - "80"
+    ports:
+      - "8083:80"
+
+  db1:
+    image: mysql:5.7
+    container_name: db1
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      NODE_ROLE: db1
+    volumes:
+      - ./mysql-conf/my-master1.cnf:/etc/mysql/conf.d/my-master1.cnf
+      - ./mysql-conf/init-master1.sql:/docker-entrypoint-initdb.d/init-master1.sql
+      - ./mysql-conf/init-replication.sh:/init-replication.sh
+      - ./mysql-conf/init-sessions.sql:/docker-entrypoint-initdb.d/init-sessions.sql
+    restart: always
+
+  db2:
+    image: mysql:5.7
+    container_name: db2
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      NODE_ROLE: db2
+    volumes:
+      - ./mysql-conf/my-master2.cnf:/etc/mysql/conf.d/my-master2.cnf
+      - ./mysql-conf/init-master2.sql:/docker-entrypoint-initdb.d/init-master2.sql
+      - ./mysql-conf/init-replication.sh:/init-replication.sh
+      - ./mysql-conf/init-sessions.sql:/docker-entrypoint-initdb.d/init-sessions.sql
+    restart: always
+
+  web-interface:
+    build: ./web-interface
+    container_name: web-interface
+    ports:
+      - "8081:80"
+    restart: always
